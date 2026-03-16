@@ -11,6 +11,7 @@ resource "aws_security_group" "mythic" {
 
   tags = {
     Name = "${var.project_name}-mythic-sg"
+    VPC  = "TeamServer-VPC"
   }
 }
 
@@ -93,6 +94,7 @@ resource "aws_security_group" "guacamole" {
 
   tags = {
     Name = "${var.project_name}-guacamole-sg"
+    VPC  = "TeamServer-VPC"
   }
 }
 
@@ -183,6 +185,7 @@ resource "aws_security_group" "windows" {
 
   tags = {
     Name = "${var.project_name}-windows-sg"
+    VPC  = "TeamServer-VPC"
   }
 }
 

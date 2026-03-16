@@ -109,6 +109,7 @@ resource "aws_security_group" "redirector" {
 
   tags = {
     Name = "${var.project_name}-redirector-sg"
+    VPC  = "Redirector-VPC"
     Note = "Simulates external VPS firewall rules"
   }
 }

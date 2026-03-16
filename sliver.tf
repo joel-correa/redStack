@@ -11,6 +11,7 @@ resource "aws_security_group" "sliver" {
 
   tags = {
     Name = "${var.project_name}-sliver-sg"
+    VPC  = "TeamServer-VPC"
   }
 }
 

@@ -11,6 +11,7 @@ resource "aws_security_group" "havoc" {
 
   tags = {
     Name = "${var.project_name}-havoc-sg"
+    VPC  = "TeamServer-VPC"
   }
 }
 
