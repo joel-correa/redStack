@@ -37,14 +37,15 @@ resource "aws_internet_gateway" "redirector" {
 resource "aws_route_table" "redirector" {
   vpc_id = aws_vpc.redirector.id
 
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.redirector.id
-  }
-
   tags = {
     Name = "${var.project_name}-redirector-rt"
   }
+}
+
+resource "aws_route" "redirector_default" {
+  route_table_id         = aws_route_table.redirector.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.redirector.id
 }
 
 resource "aws_route_table_association" "redirector" {

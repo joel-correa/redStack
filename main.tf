@@ -123,14 +123,16 @@ resource "aws_route_table" "training" {
   count  = var.use_default_vpc ? 0 : 1
   vpc_id = aws_vpc.training[0].id
 
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.training[0].id
-  }
-
   tags = {
     Name = "${var.project_name}-rt"
   }
+}
+
+resource "aws_route" "training_default" {
+  count                  = var.use_default_vpc ? 0 : 1
+  route_table_id         = aws_route_table.training[0].id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.training[0].id
 }
 
 resource "aws_route_table_association" "training" {
