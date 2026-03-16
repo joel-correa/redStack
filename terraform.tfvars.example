@@ -65,9 +65,14 @@ enable_redirector_htaccess_filtering = true   # Set to false for HTB/VL/PG — s
 
 # Optional: Custom tags applied to every AWS resource (instances, SGs, EIPs, etc.)
 # Useful for cost tracking, filtering resources in the AWS Console, and billing reports
+#
+# NOTE: Every resource also receives a "Project" tag automatically set to project_name above.
+# To filter a specific deployment in the AWS Console: filter by Project = <project_name>
+# For two simultaneous deployments use distinct project_name values (e.g. "redStack" and "redStack-demo")
+# and matching CostCenter tags so you can isolate each deployment in billing and resource views.
 tags = {
   Owner      = "Operator"
-  CostCenter = "pub-redStack"
+  CostCenter = "redStack"        # Match this to project_name for per-deployment cost filtering
   Purpose    = "Boot-to-Breach Training Environment"
 }
 
