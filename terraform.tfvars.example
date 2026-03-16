@@ -41,7 +41,7 @@ redirector_instance_type = "t3.small"   # 2 vCPU, 2GB RAM
 # Network configuration
 use_default_vpc     = false          # Creates a dedicated VPC (recommended)
 vpc_cidr            = "10.50.0.0/16" # TeamServer VPC CIDR
-redirector_vpc_cidr = "10.60.0.0/16" # Redirector VPC CIDR — change to 10.61.0.0/16 for a second simultaneous deployment
+redirector_vpc_cidr = "10.60.0.0/16" # Redirector VPC CIDR — change to 10.61.0.0/16 for redStack-extVPN simultaneous deployment
 
 # Mythic configuration
 enable_mythic_autostart = true  # Auto-start Mythic on boot
@@ -68,7 +68,7 @@ enable_redirector_htaccess_filtering = true   # Set to false for HTB/VL/PG — s
 #
 # NOTE: Every resource also receives a "Project" tag automatically set to project_name above.
 # To filter a specific deployment in the AWS Console: filter by Project = <project_name>
-# For two simultaneous deployments use distinct project_name values (e.g. "redStack" and "redStack-demo")
+# For two simultaneous deployments use distinct project_name values (e.g. "redStack" and "redStack-extVPN")
 # and matching CostCenter tags so you can isolate each deployment in billing and resource views.
 tags = {
   Owner      = "Operator"
