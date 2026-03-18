@@ -237,6 +237,8 @@ If you are not sure which account type you have, go back and re-read the dedicat
 
 </details>
 
+<br>
+
 **Minimum IAM Policy:**
 
 ```json
