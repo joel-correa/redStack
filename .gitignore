@@ -12,6 +12,11 @@ terraform.tfvars
 .terraform/
 .terraform.lock.hcl
 
+# Local editor config (not for repo)
+.markdownlint.json
+.markdownlint.jsonc
+.markdownlint.yaml
+
 # Editor/OS artifacts
 *.swp
 *.swo
