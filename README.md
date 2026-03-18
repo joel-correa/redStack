@@ -199,7 +199,7 @@ There are two recommended approaches:
 Create a dedicated IAM user with the `AdministratorAccess` managed policy attached. This is the fastest path and is fine for a throwaway lab account used solely for redStack.
 
 1. Go to **IAM Console** > **Users** > **Create user**
-2. Set a username (e.g., `redstack-admin`)
+2. Set a username (e.g., `redS-operator`)
 3. Attach the policy: `AdministratorAccess`
 4. Under **Security credentials**, create an access key and copy the Access Key ID and Secret Access Key
 
@@ -238,7 +238,7 @@ If you are deploying into a shared or production account, create a user with onl
 </details>
 
 1. Go to **IAM Console** > **Users** > **Create user**
-2. Set a username (e.g., `redstack-deploy`)
+2. Set a username (e.g., `redS-operator`)
 3. Under **Permissions**, choose **Attach policies directly** > **Create policy**, and paste the JSON above
 4. Under **Security credentials**, create an access key and copy the Access Key ID and Secret Access Key
 
