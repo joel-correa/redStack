@@ -12,6 +12,10 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.0"
     }
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.0"
+    }
   }
 }
 
@@ -221,6 +225,7 @@ resource "aws_instance" "mythic" {
     havoc_private_ip      = aws_network_interface.havoc.private_ip
     redirector_private_ip = aws_network_interface.redirector.private_ip
     windows_private_ip    = aws_network_interface.windows.private_ip
+    mythic_admin_password = random_password.lab.result
   })
 
   metadata_options {

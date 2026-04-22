@@ -15,6 +15,7 @@ ENABLE_AUTOSTART="${enable_autostart}"
 SSH_PASSWORD="${ssh_password}"
 VPC_CIDR="${vpc_cidr}"
 REDIRECTOR_VPC_CIDR="${redirector_vpc_cidr}"
+MYTHIC_ADMIN_PASSWORD="${mythic_admin_password}"
 
 # Set hostname
 echo "[*] Setting hostname..."
@@ -110,6 +111,10 @@ cd Mythic
 # Install Mythic CLI
 echo "[*] Installing Mythic CLI..."
 make
+
+# Set admin password before first start so it's deterministic
+echo "[*] Configuring Mythic admin password..."
+./mythic-cli config set MYTHIC_ADMIN_PASSWORD "$MYTHIC_ADMIN_PASSWORD"
 
 # Start Mythic (first run generates configs)
 echo "[*] Starting Mythic (this will take 3-5 minutes)..."
