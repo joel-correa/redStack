@@ -48,6 +48,7 @@ locals {
     SSH (internal): ssh admin@${aws_network_interface.havoc.private_ip}
     Havoc User:   operator
     Havoc Pass:   ${nonsensitive(random_password.lab.result)}
+    Teamserver:   Host: havoc  |  Port: 40056  |  User: operator  |  Pass: ${nonsensitive(random_password.lab.result)}
     Guacamole:    Havoc C2 Desktop (VNC) | Havoc C2 Server (SSH)
 
   +---------------------------------------------------------------------+
