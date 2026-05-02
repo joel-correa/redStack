@@ -27,6 +27,7 @@ ${mythic_private_ip}     mythic
 ${sliver_private_ip}     sliver
 ${havoc_private_ip}      havoc
 ${windows_private_ip}    win-operator
+${kali_private_ip}       kali
 HOSTS
 
 # Set SSH password for Guacamole access
@@ -45,6 +46,13 @@ PubkeyAuthentication yes
 # Allow password auth only from private networks (for Guacamole access via VPC)
 Match Address 172.16.0.0/12,10.0.0.0/8
     PasswordAuthentication yes
+
+# Enable opt-in remote port forwarding for Kali callback workflows.
+# 'clientspecified' means an operator must explicitly request a non-localhost
+# bind via `ssh -R *:port:host:port` or `ssh -R bind:port:host:port`.
+# Without this, all `ssh -R` listeners would silently bind to 127.0.0.1
+# and be unreachable by external CTF targets through tun0.
+GatewayPorts clientspecified
 SSHCONF
 
 systemctl restart sshd

@@ -165,11 +165,16 @@ resource "aws_instance" "havoc" {
     sliver_private_ip     = aws_network_interface.sliver.private_ip
     redirector_private_ip = aws_network_interface.redirector.private_ip
     windows_private_ip    = aws_network_interface.windows.private_ip
+    kali_private_ip       = aws_network_interface.kali.private_ip
   })
 
   metadata_options {
     http_endpoint = "enabled"
     http_tokens   = "required"
+  }
+
+  lifecycle {
+    ignore_changes = [user_data]
   }
 
   tags = {

@@ -19,6 +19,8 @@ REDIRECTOR_PRIVATE_IP="${redirector_private_ip}"
 SLIVER_PRIVATE_IP="${sliver_private_ip}"
 HAVOC_PRIVATE_IP="${havoc_private_ip}"
 GUACAMOLE_PRIVATE_IP="${guacamole_private_ip}"
+KALI_PRIVATE_IP="${kali_private_ip}"
+KALI_DEPLOYMENT_MODE="${kali_deployment_mode}"
 
 # Update system
 echo "[*] Updating system packages..."
@@ -376,6 +378,54 @@ if [ -n "$TOKEN" ]; then
                 \"max-connections-per-user\": \"1\"
             }
         }"
+
+    # Create SSH connection to Kali Operator
+    echo "[*] Creating SSH connection to Kali Operator..."
+    curl -s -X POST "http://localhost:8080/guacamole/api/session/data/postgresql/connections?token=$TOKEN" \
+        -H "Content-Type: application/json" \
+        -d "{
+            \"name\": \"Kali Operator (SSH)\",
+            \"protocol\": \"ssh\",
+            \"parameters\": {
+                \"hostname\": \"$KALI_PRIVATE_IP\",
+                \"port\": \"22\",
+                \"username\": \"admin\",
+                \"password\": \"$SSH_PASSWORD\",
+                \"color-scheme\": \"green-black\",
+                \"font-size\": \"12\"
+            },
+            \"attributes\": {
+                \"max-connections\": \"2\",
+                \"max-connections-per-user\": \"1\"
+            }
+        }"
+
+    # Create RDP connection to Kali Desktop only when GUI mode is selected.
+    # In headless mode, the operator can register this connection later via
+    # the Kali helper script /usr/local/sbin/kali-go-gui.
+    if [ "$KALI_DEPLOYMENT_MODE" = "gui" ]; then
+        echo "[*] Creating RDP connection to Kali Operator desktop..."
+        curl -s -X POST "http://localhost:8080/guacamole/api/session/data/postgresql/connections?token=$TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{
+                \"name\": \"Kali Operator (XRDP)\",
+                \"protocol\": \"rdp\",
+                \"parameters\": {
+                    \"hostname\": \"$KALI_PRIVATE_IP\",
+                    \"port\": \"3389\",
+                    \"username\": \"admin\",
+                    \"password\": \"$SSH_PASSWORD\",
+                    \"security\": \"any\",
+                    \"ignore-cert\": \"true\",
+                    \"color-depth\": \"24\",
+                    \"resize-method\": \"display-update\"
+                },
+                \"attributes\": {
+                    \"max-connections\": \"2\",
+                    \"max-connections-per-user\": \"1\"
+                }
+            }"
+    fi
     else
         echo "[!] Could not obtain valid token after password change. Skipping connection creation."
     fi

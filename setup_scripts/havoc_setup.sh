@@ -29,6 +29,7 @@ ${mythic_private_ip}     mythic
 ${sliver_private_ip}     sliver
 ${redirector_private_ip} redirector
 ${windows_private_ip}    win-operator
+${kali_private_ip}       kali
 HOSTS
 
 # ── SSH first — ensures recovery access even if later steps fail ─────────────

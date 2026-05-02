@@ -226,6 +226,7 @@ resource "aws_instance" "redirector" {
     sliver_private_ip     = aws_network_interface.sliver.private_ip
     havoc_private_ip      = aws_network_interface.havoc.private_ip
     windows_private_ip    = aws_network_interface.windows.private_ip
+    kali_private_ip       = aws_network_interface.kali.private_ip
     setup_script_b64 = base64gzip(replace(templatefile("${path.module}/setup_scripts/redirector_setup.sh", {
       mythic_private_ip     = aws_network_interface.mythic.private_ip
       sliver_private_ip     = aws_network_interface.sliver.private_ip
@@ -251,6 +252,10 @@ resource "aws_instance" "redirector" {
     aws_vpc_peering_connection.redirector_to_teamserver,
     aws_route.redirector_to_teamserver
   ]
+
+  lifecycle {
+    ignore_changes = [user_data]
+  }
 
   tags = {
     Name = "${var.project_name}-apache-redirector"

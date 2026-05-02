@@ -74,6 +74,28 @@ data "aws_ami" "debian12" {
   }
 }
 
+# Get latest official Kali Linux AMI (rolling release, published by Kali project)
+# Marketplace EULA must be accepted once per AWS account before first launch.
+data "aws_ami" "kali" {
+  most_recent = true
+  owners      = ["679593333241"] # Kali Linux project
+
+  filter {
+    name   = "name"
+    values = ["kali-last-snapshot-amd64-*"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
 # Get latest Windows Server 2022 AMI
 data "aws_ami" "windows2022" {
   most_recent = true
@@ -225,12 +247,20 @@ resource "aws_instance" "mythic" {
     havoc_private_ip      = aws_network_interface.havoc.private_ip
     redirector_private_ip = aws_network_interface.redirector.private_ip
     windows_private_ip    = aws_network_interface.windows.private_ip
+    kali_private_ip       = aws_network_interface.kali.private_ip
     mythic_admin_password = random_password.lab.result
   })
 
   metadata_options {
     http_endpoint = "enabled"
     http_tokens   = "required" # IMDSv2 only
+  }
+
+  # Stay insensitive to user_data drift on running boxes. v0.3 hygiene:
+  # template additions (e.g., new lab hosts) should not force replacement
+  # of an in-flight deployment. Fresh applies still pick up the new template.
+  lifecycle {
+    ignore_changes = [user_data]
   }
 
   tags = {
@@ -280,6 +310,7 @@ resource "aws_instance" "guacamole" {
     havoc_private_ip      = aws_network_interface.havoc.private_ip
     redirector_private_ip = aws_network_interface.redirector.private_ip
     windows_private_ip    = aws_network_interface.windows.private_ip
+    kali_private_ip       = aws_network_interface.kali.private_ip
     setup_script_b64 = base64gzip(replace(templatefile("${path.module}/setup_scripts/guacamole_setup.sh", {
       guac_admin_password   = random_password.lab.result
       windows_private_ip    = aws_network_interface.windows.private_ip
@@ -291,6 +322,8 @@ resource "aws_instance" "guacamole" {
       sliver_private_ip     = aws_network_interface.sliver.private_ip
       havoc_private_ip      = aws_network_interface.havoc.private_ip
       guacamole_private_ip  = aws_network_interface.guacamole.private_ip
+      kali_private_ip       = aws_network_interface.kali.private_ip
+      kali_deployment_mode  = var.kali_deployment_mode
       enable_external_vpn   = var.enable_external_vpn
       external_vpn_cidrs    = var.external_vpn_cidrs
     }), "\r", ""))
@@ -301,6 +334,10 @@ resource "aws_instance" "guacamole" {
   metadata_options {
     http_endpoint = "enabled"
     http_tokens   = "required"
+  }
+
+  lifecycle {
+    ignore_changes = [user_data]
   }
 
   tags = {
@@ -342,12 +379,17 @@ resource "aws_instance" "windows" {
       "${aws_network_interface.sliver.private_ip}    sliver",
       "${aws_network_interface.havoc.private_ip}    havoc",
       "${aws_network_interface.redirector.private_ip}    redirector",
+      "${aws_network_interface.kali.private_ip}    kali",
     ])
   )
 
   metadata_options {
     http_endpoint = "enabled"
     http_tokens   = "required"
+  }
+
+  lifecycle {
+    ignore_changes = [user_data]
   }
 
   tags = {

@@ -67,6 +67,28 @@ variable "havoc_instance_type" {
   default     = "t3.medium"
 }
 
+variable "kali_deployment_mode" {
+  description = "Kali operator deployment mode: 'headless' (SSH only via Guacamole) or 'gui' (XFCE + XRDP via Guacamole). Headless is faster and cheaper; GUI can be enabled post-deploy via /usr/local/sbin/kali-go-gui."
+  type        = string
+  default     = "headless"
+  validation {
+    condition     = contains(["headless", "gui"], var.kali_deployment_mode)
+    error_message = "kali_deployment_mode must be 'headless' or 'gui'."
+  }
+}
+
+variable "kali_instance_type" {
+  description = "EC2 instance type for Kali operator. Leave empty to auto-pick by mode (t3.medium for headless, t3.large for gui)."
+  type        = string
+  default     = ""
+}
+
+variable "kali_volume_size" {
+  description = "Root volume size in GB for the Kali operator. Leave 0 to auto-pick by mode (30 for headless, 50 for gui)."
+  type        = number
+  default     = 0
+}
+
 variable "use_default_vpc" {
   description = "Use default VPC (true) or create dedicated VPC (false)"
   type        = bool

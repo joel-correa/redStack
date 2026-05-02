@@ -110,9 +110,21 @@ VPNINFO
     Access:       RDP via Guacamole
     Guacamole:    Windows Operator Workstation (RDP)
 
+  +---------------------------------------------------------------------+
+  | 7. KALI LINUX OPERATOR                                              |
+  +---------------------------------------------------------------------+
+    Private IP:   ${aws_network_interface.kali.private_ip}
+    Mode:         ${upper(var.kali_deployment_mode)}
+    SSH Username: admin
+    SSH Password: ${nonsensitive(random_password.lab.result)}
+    SSH (internal): ssh admin@${aws_network_interface.kali.private_ip}
+    Guacamole:    Kali Operator (SSH)${var.kali_deployment_mode == "gui" ? " | Kali Operator (XRDP)" : ""}
+    First steps:  sudo install-kali-tools  (21-package AD/enum lineup)
+                  ${var.kali_deployment_mode == "headless" ? "sudo kali-go-gui          (convert headless -> GUI later)" : "GUI active. Connect via Guacamole > Kali Operator (XRDP)."}
+
   EOT
 
-  network_architecture_content = <<-EOT
+network_architecture_content = <<-EOT
 
   +---------------------------------------------------------------------+
   |                     NETWORK ARCHITECTURE                            |
@@ -125,6 +137,7 @@ VPNINFO
   |  Havoc C2 Server        |  ${aws_network_interface.havoc.private_ip}
   |  Guacamole              |  ${aws_network_interface.guacamole.private_ip} (priv)  /  ${aws_eip.guacamole.public_ip} (pub)
   |  Windows Operator       |  ${aws_network_interface.windows.private_ip}
+  |  Kali Operator          |  ${aws_network_interface.kali.private_ip} (${var.kali_deployment_mode})
   +-------------------------+-------------------------------------------+
 
   VPC B: Redirector Infrastructure (${aws_vpc.redirector.cidr_block})
