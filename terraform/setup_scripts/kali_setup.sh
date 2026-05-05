@@ -25,12 +25,11 @@ KALI_MODE="${kali_deployment_mode}"
 #    This is the FIRST action so the rename completes before any operator
 #    can successfully SSH in. The AMI's pre-baked SSH key follows the home dir.
 # ----------------------------------------------------------------------------
-echo "[*] Renaming default 'kali' user to 'admin'..."
 if id kali >/dev/null 2>&1; then
     # Rename login name and move home directory contents
     usermod -l admin -d /home/admin -m kali
     # Rename the primary group to match
-    groupmod -n admin kali 2>/dev/null || echo "    (group rename skipped: 'admin' may already exist)"
+    groupmod -n admin kali 2>/dev/null || true
     # Relocate cloud-init's per-user sudoers entry if present
     if [ -f /etc/sudoers.d/90-cloud-init-users ]; then
         sed -i 's/\bkali\b/admin/g' /etc/sudoers.d/90-cloud-init-users
@@ -39,7 +38,6 @@ if id kali >/dev/null 2>&1; then
         sed -i 's/\bkali\b/admin/g' /etc/sudoers.d/kali
         mv /etc/sudoers.d/kali /etc/sudoers.d/admin
     fi
-    echo "[+] Renamed kali -> admin"
 else
     echo "[!] No 'kali' user found. AMI may have changed; admin user must be created manually."
 fi
@@ -47,10 +45,8 @@ fi
 # ----------------------------------------------------------------------------
 # 2. Hostname + /etc/hosts
 # ----------------------------------------------------------------------------
-echo "[*] Setting hostname..."
 hostnamectl set-hostname kali
 
-echo "[*] Configuring /etc/hosts..."
 cat >> /etc/hosts << HOSTS
 
 # redStack lab hosts
@@ -68,10 +64,7 @@ HOSTS
 #    No `apt upgrade` (Kali rolling churns and can break tools).
 #    Heavy tooling is opt-in via /usr/local/sbin/install-kali-tools.
 # ----------------------------------------------------------------------------
-echo "[*] Updating apt indexes..."
 apt-get update
-
-echo "[*] Installing minimal baseline packages..."
 DEBIAN_FRONTEND=noninteractive apt-get install -y \
     curl \
     wget \
@@ -85,7 +78,6 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y \
 # ----------------------------------------------------------------------------
 # 4. SSH password auth for Guacamole access (private CIDRs only)
 # ----------------------------------------------------------------------------
-echo "[*] Configuring admin password and SSH..."
 echo "admin:$SSH_PASSWORD" | chpasswd
 
 cat >> /etc/ssh/sshd_config << 'SSHCONF'
@@ -104,7 +96,6 @@ systemctl restart ssh
 # ----------------------------------------------------------------------------
 # 5. UFW firewall
 # ----------------------------------------------------------------------------
-echo "[*] Configuring UFW firewall..."
 ufw --force reset
 ufw default deny incoming
 ufw default allow outgoing
@@ -116,24 +107,21 @@ ufw --force enable
 # 6. install-kali-tools helper (curated 21-package AD/enum lineup)
 #    Operator runs `sudo install-kali-tools` after first SSH login.
 # ----------------------------------------------------------------------------
-echo "[*] Installing /usr/local/sbin/install-kali-tools helper..."
 cat > /usr/local/sbin/install-kali-tools << 'TOOLSCRIPT'
 #!/bin/bash
 # install-kali-tools - One-shot installer for the redStack curated tool lineup.
 #
-# Twenty-one packages, weighted toward Active Directory enumeration and attack.
-# Idempotent: safe to re-run; apt will upgrade existing packages and skip
-# already-current ones. Does not use `set -e` so a single failed package does
-# not abort the rest of the batch.
+# Twenty-one tools, weighted toward Active Directory enumeration and attack.
+# Idempotent: safe to re-run. Does not use `set -e` so a single failure does
+# not abort the rest.
 #
-# Bucket breakdown:
-#   Network enum (4): nmap, enum4linux-ng, smbmap, mitm6
-#   AD enum     (4): pre2k, ldap-utils, windapsearch, adidnsdump
-#   Wordlists/web (2): seclists, gobuster
-#   AD attack   (7): coercer, impacket-scripts, netexec, evil-winrm,
-#                    bloodhound.py, kerbrute, certipy-ad
-#   Cred/relay  (3): responder, hashcat, john
-#   Meta        (1): pipx (PEP 668-compliant Python tool installer)
+# Install methods:
+#   apt  (17): nmap, enum4linux-ng, smbmap, mitm6, ldap-utils, seclists,
+#              gobuster, coercer, impacket-scripts, netexec, evil-winrm,
+#              bloodhound.py, certipy-ad, responder, hashcat, john, pipx
+#   pipx  (1): adidnsdump
+#   pipx+git(1): pre2k (not on PyPI — installed from github.com/garrettfoster13/pre2k)
+#   binary(2): kerbrute, windapsearch  (GitHub release binaries)
 
 if [ "$(id -u)" -ne 0 ]; then
     echo "ERROR: run as root (sudo install-kali-tools)" >&2
@@ -145,18 +133,14 @@ PACKAGES=(
     enum4linux-ng
     smbmap
     mitm6
-    pre2k
     seclists
     gobuster
     coercer
     ldap-utils
-    windapsearch
-    adidnsdump
     impacket-scripts
     netexec
     evil-winrm
     bloodhound.py
-    kerbrute
     certipy-ad
     responder
     hashcat
@@ -165,7 +149,7 @@ PACKAGES=(
 )
 
 echo "[*] redStack curated Kali tool installer"
-echo "[*] Installing $${#PACKAGES[@]} packages. Estimated time: 8-12 minutes."
+echo "[*] Installing 21 tools: $${#PACKAGES[@]} via apt, 2 via pipx, 2 via GitHub binary."
 echo ""
 
 apt-get update
@@ -182,26 +166,76 @@ for pkg in "$${PACKAGES[@]}"; do
     fi
 done
 
+
+# ---- Non-apt tools: pipx and GitHub binaries ----
+echo ""
+echo "===== Non-apt tools ====="
+
+export PATH="$${PATH}:/root/.local/bin"
+
+# adidnsdump is on PyPI
+echo "----- adidnsdump (pipx) -----"
+if pipx install --force adidnsdump > /dev/null 2>&1; then
+    INSTALLED+=("adidnsdump")
+else
+    FAILED+=("adidnsdump")
+fi
+
+# pre2k is NOT on PyPI — install from GitHub
+echo "----- pre2k (pipx from github) -----"
+if pipx install --force "git+https://github.com/garrettfoster13/pre2k" > /dev/null 2>&1; then
+    INSTALLED+=("pre2k")
+else
+    FAILED+=("pre2k")
+fi
+
+echo "----- kerbrute (github binary) -----"
+KERBRUTE_URL=$(curl -sf https://api.github.com/repos/ropnop/kerbrute/releases/latest \
+    | jq -r '.assets[] | select(.name == "kerbrute_linux_amd64") | .browser_download_url')
+if [ -n "$${KERBRUTE_URL}" ] \
+    && wget -q "$${KERBRUTE_URL}" -O /usr/local/bin/kerbrute \
+    && chmod 755 /usr/local/bin/kerbrute; then
+    INSTALLED+=("kerbrute")
+    echo "    -> /usr/local/bin/kerbrute"
+else
+    FAILED+=("kerbrute")
+fi
+
+echo "----- windapsearch (github binary) -----"
+WIND_URL=$(curl -sf https://api.github.com/repos/ropnop/go-windapsearch/releases/latest \
+    | jq -r '.assets[] | select(.name == "windapsearch-linux-amd64") | .browser_download_url')
+if [ -n "$${WIND_URL}" ] \
+    && wget -q "$${WIND_URL}" -O /usr/local/bin/windapsearch \
+    && chmod 755 /usr/local/bin/windapsearch; then
+    INSTALLED+=("windapsearch")
+    echo "    -> /usr/local/bin/windapsearch"
+else
+    FAILED+=("windapsearch")
+fi
+
 echo ""
 echo "===== Install summary ====="
-echo "Installed cleanly: $${#INSTALLED[@]} / $${#PACKAGES[@]}"
+echo "Installed: $${#INSTALLED[@]} / 21"
 if [ "$${#FAILED[@]}" -gt 0 ]; then
-    echo "Failed packages:"
+    echo "Failed:"
     for pkg in "$${FAILED[@]}"; do
-        echo "  - $pkg"
+        echo "  - $${pkg}"
     done
     echo ""
-    echo "Re-run the installer or check 'apt-cache policy <pkg>' to investigate."
+    echo "Re-run sudo install-kali-tools to retry failed items."
     exit 1
 fi
-echo "All curated tools installed."
+echo "All 21 curated tools installed."
 TOOLSCRIPT
 chmod 755 /usr/local/sbin/install-kali-tools
+
+# Run the installer now so tools are ready on first operator login.
+echo "[*] Running install-kali-tools at setup (8-12 min)..."
+/usr/local/sbin/install-kali-tools || true
 
 # ----------------------------------------------------------------------------
 # 7. kali-go-gui helper (post-deploy headless -> GUI conversion)
 # ----------------------------------------------------------------------------
-echo "[*] Installing /usr/local/sbin/kali-go-gui helper..."
 cat > /usr/local/sbin/kali-go-gui << 'GUISCRIPT'
 #!/bin/bash
 # kali-go-gui - Convert a headless Kali deployment to GUI without re-running terraform.
@@ -261,16 +295,16 @@ chmod 755 /usr/local/sbin/kali-go-gui
 # ----------------------------------------------------------------------------
 # 8. MOTD banner (shown on every SSH login)
 # ----------------------------------------------------------------------------
-echo "[*] Installing MOTD banner..."
 cat > /etc/update-motd.d/99-kali-mode << MOTD
 #!/bin/bash
 cat << BANNER
 
 +=====================================================================+
-|  redStack KALI OPERATOR                                             |
+|  redStack KALI WORKSTATION                                          |
 +=====================================================================+
    Mode:           $(echo "${kali_deployment_mode}" | tr '[:lower:]' '[:upper:]')
-   Install tools:  sudo install-kali-tools     (21-package AD/enum lineup)
+   Tools:          21-tool AD/enum suite (installed at setup)
+   Refresh/fix:    sudo install-kali-tools
    Convert to GUI: sudo kali-go-gui            (only needed in HEADLESS mode)
    Lab hosts:      kali, guac, mythic, sliver, havoc, redirector, windows
 +=====================================================================+
@@ -284,11 +318,14 @@ if [ -f /etc/update-motd.d/00-kali ]; then
     chmod -x /etc/update-motd.d/00-kali
 fi
 
+# Suppress the Kali developer "minimal install" message
+touch /home/admin/.hushlogin
+chown admin:admin /home/admin/.hushlogin
+
 # ----------------------------------------------------------------------------
 # 9. GUI install if mode == gui
 # ----------------------------------------------------------------------------
 if [ "$KALI_MODE" = "gui" ]; then
-    echo "[*] kali_deployment_mode=gui: installing XFCE + XRDP at boot..."
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
         kali-desktop-xfce \
         xrdp
@@ -303,8 +340,6 @@ XSESSION
 
     systemctl enable xrdp
     systemctl restart xrdp
-    echo "[+] XFCE + XRDP installed and enabled."
 fi
 
 echo "===== Kali Operator Setup Completed $(date) ====="
-echo "===== SSH as admin@kali. Run 'sudo install-kali-tools' to provision the tool suite. ====="
