@@ -72,6 +72,18 @@ ufw allow from $REDIRECTOR_VPC_CIDR to any port 443 proto tcp comment 'HTTPS C2 
 ufw allow 31337/tcp comment 'Sliver multiplexer'
 ufw --force enable
 
+# Add swap space — Sliver's Go compiler uses 1-2GB RAM during implant generation.
+# Without swap, t3.small exhausts memory and sshd can no longer fork, causing
+# banner-exchange hangs until reboot.
+if [ ! -f /swapfile ]; then
+    fallocate -l 2G /swapfile
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    echo "[+] 2GB swap enabled"
+fi
+
 # Install Sliver C2
 curl https://sliver.sh/install | sudo bash
 
