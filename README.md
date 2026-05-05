@@ -6,7 +6,7 @@
 
 ![redStack Banner](assets/redStack-banner.png)
 
-> A self-contained Boot-to-Breach lab on AWS. Deploy a full red-team training environment in ~30 minutes: three C2 frameworks (Mythic, Sliver, Havoc), an Apache redirector, a Kali workstation, a Windows workstation, and a Guacamole portal. Two peered VPCs, header + URI gating, scanner blocking, optional OpenVPN routing for HTB / VulnLab / Proving Grounds.
+> A self-contained Boot-to-Breach lab on AWS. Deploy a full red-team training environment in ~45 minutes: three C2 frameworks (Mythic, Sliver, Havoc), an Apache redirector, a Kali workstation, a Windows workstation, and a Guacamole portal. Two peered VPCs, header + URI gating, scanner blocking, optional OpenVPN routing for HTB / VulnLab / Proving Grounds.
 
 **📖 [Full documentation lives in the redStack Wiki →](https://github.com/BaddKharma/redStack/wiki)**
 
@@ -59,7 +59,7 @@ Architecture diagram: **[Lab-Architecture](https://github.com/BaddKharma/redStac
 
 ## Cost
 
-Roughly **$0.25/hour** of compute while running. With `terraform destroy` between sessions (recommended), expected monthly cost is **~$5-11/month** for typical 5-10 hr/wk study cadence. Full breakdown including stop-vs-destroy tradeoffs: **[Cost-Management](https://github.com/BaddKharma/redStack/wiki/17.-Cost-Management)**.
+Roughly **$0.27/hour** of compute while running. With `terraform destroy` between sessions (recommended), expected monthly cost is **~$15-20/month** for typical 5-10 hr/wk study cadence. Full breakdown including stop-vs-destroy tradeoffs: **[Cost-Management](https://github.com/BaddKharma/redStack/wiki/17.-Cost-Management)**.
 
 > [!CAUTION]
 > Forgetting a deployed lab is the #1 cause of unexpected AWS bills. Set a CloudWatch billing alarm before your first `terraform apply`.
@@ -74,7 +74,7 @@ Roughly **$0.25/hour** of compute while running. With `terraform destroy` betwee
 
 ## Wiki Page Map
 
-**Getting started:** [Home](https://github.com/BaddKharma/redStack/wiki) · [Quick-Start](https://github.com/BaddKharma/redStack/wiki/01.-Quick-Start) · [Prerequisites](https://github.com/BaddKharma/redStack/wiki/02.-Prerequisites) · [Deployment-Modes](https://github.com/BaddKharma/redStack/wiki/04.-Deployment-Mode-Architecture) · [Deploy](https://github.com/BaddKharma/redStack/wiki/04.-Deploy) · [Verify](https://github.com/BaddKharma/redStack/wiki/05.-Verify)
+**Getting started:** [Home](https://github.com/BaddKharma/redStack/wiki) · [Quick-Start](https://github.com/BaddKharma/redStack/wiki/01.-Quick-Start) · [Prerequisites](https://github.com/BaddKharma/redStack/wiki/02.-Prerequisites) · [Deployment-Modes](https://github.com/BaddKharma/redStack/wiki/04.-Deployment-Mode-Architecture) · [Deploy](https://github.com/BaddKharma/redStack/wiki/04.-Deploy) · [Verify](https://github.com/BaddKharma/redStack/wiki/05.-Verify) · [First-Run](https://github.com/BaddKharma/redStack/wiki/06.-First-Run)
 
 **Reference:** [Lab-Architecture](https://github.com/BaddKharma/redStack/wiki/04.-Deployment-Mode-Architecture) · [Lab-Inventory](https://github.com/BaddKharma/redStack/wiki/07.-Lab-Inventory) · [SSH-Access](https://github.com/BaddKharma/redStack/wiki/08.-SSH-Access) · [Cost-Management](https://github.com/BaddKharma/redStack/wiki/17.-Cost-Management)
 
@@ -82,7 +82,7 @@ Roughly **$0.25/hour** of compute while running. With `terraform destroy` betwee
 
 **Workstations:** [Windows](https://github.com/BaddKharma/redStack/wiki/13.-Windows) · [Kali](https://github.com/BaddKharma/redStack/wiki/14.-Kali)
 
-**Infrastructure:** [Guacamole](https://github.com/BaddKharma/redStack/wiki/15.-Guacamole) · [Redirector](https://github.com/BaddKharma/redStack/wiki/09.-Redirector) · [External-Targets](https://github.com/BaddKharma/redStack/wiki/16.-External-Targets)
+**Infrastructure:** [Guacamole](https://github.com/BaddKharma/redStack/wiki/15.-Guacamole) · [Redirector](https://github.com/BaddKharma/redStack/wiki/09.-Redirector) · [OpenVPN-Tunnel-Environments](https://github.com/BaddKharma/redStack/wiki/16.-OpenVPN-Tunnel-Environments)
 
 **Help:** [Troubleshooting](https://github.com/BaddKharma/redStack/wiki/18.-Troubleshooting)
 
