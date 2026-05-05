@@ -68,16 +68,16 @@ locals {
                   ${var.sliver_uri_prefix}/ -> Sliver
                   ${var.havoc_uri_prefix}/ -> Havoc
     Decoy Page:   CloudEdge CDN maintenance (no header = decoy)
-${var.enable_external_vpn ? <<-VPNINFO
+${var.enable_vpn_tunnel ? <<-VPNINFO
 
   +---------------------------------------------------------------------+
-  | 5b. EXTERNAL VPN ROUTING (OpenVPN + WireGuard)                      |
+  | 5b. vpnTUN ROUTING (OpenVPN + WireGuard)                      |
   +---------------------------------------------------------------------+
     Status:       ENABLED
     WG Server:    ${aws_network_interface.redirector.private_ip} (redirector, wg0: 10.100.0.1)
     WG Client:    ${aws_network_interface.guacamole.private_ip}  (guacamole, wg0: 10.100.0.2)
-    Target CIDRs: ${join(", ", var.external_vpn_cidrs)}
-    VPN Service:  sudo systemctl {start|stop|status} ext-vpn    (on redirector)
+    Target CIDRs: ${join(", ", var.vpn_tunnel_cidrs)}
+    VPN Service:  sudo systemctl {start|stop|status} vpn-tunnel    (on redirector)
     WG Status:    sudo wg show                                   (on redirector or guacamole)
 
     NOTE: WireGuard is configured automatically at boot, no pre-deploy key setup needed.
@@ -94,7 +94,7 @@ ${var.enable_external_vpn ? <<-VPNINFO
       2. SCP to redirector from windows:
          scp lab.ovpn admin@${aws_network_interface.redirector.private_ip}:~/vpn/
       3. Start VPN service on redirector:
-         sudo systemctl start ext-vpn
+         sudo systemctl start vpn-tunnel
       4. Verify WireGuard tunnel is up:
          sudo wg show          (redirector: should list guacamole as peer with handshake time)
          sudo wg show          (guacamole: should list redirector as peer with handshake time)
@@ -162,18 +162,18 @@ network_architecture_content = <<-EOT
        +--  ${format("%-25s", format("%s/", var.havoc_uri_prefix))}-->  ${format("%-15s", aws_network_interface.havoc.private_ip)}  (havoc)
        +--  ${format("%-25s", "[no valid header]")}-->  Decoy page (CloudEdge CDN)
 
-${var.enable_external_vpn ? <<-VPNARCH
+${var.enable_vpn_tunnel ? <<-VPNARCH
 
-  External VPN Routing (HTB / VL / PG via OpenVPN + WireGuard):
+  vpnTUN Routing (HTB / VL / PG via OpenVPN + WireGuard):
   +-------------------------+-------------------------------------------+
   |  WG Server (redirector) |  wg0: 10.100.0.1
   |  WG Client (guacamole)  |  wg0: 10.100.0.2
-  |  Routed CIDRs           |  ${join(", ", var.external_vpn_cidrs)}
+  |  Routed CIDRs           |  ${join(", ", var.vpn_tunnel_cidrs)}
   +-------------------------+-------------------------------------------+
 
     [Internal Machine]
        |
-       v  VPC route (ExtVPN CIDRs) -> guacamole ENI
+       v  VPC route (vpnTUN CIDRs) -> guacamole ENI
     guacamole  (wg0: 10.100.0.2, MASQUERADE)
        |
        v  WireGuard tunnel (UDP 51820)

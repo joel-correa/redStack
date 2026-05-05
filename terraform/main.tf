@@ -204,7 +204,7 @@ resource "aws_network_interface" "mythic" {
 resource "aws_network_interface" "guacamole" {
   subnet_id         = local.subnet_id
   security_groups   = [aws_security_group.guacamole.id]
-  source_dest_check = var.enable_external_vpn ? false : true
+  source_dest_check = var.enable_vpn_tunnel ? false : true
   tags              = { Name = "${var.project_name}-guacamole-eni" }
 }
 
@@ -325,8 +325,8 @@ resource "aws_instance" "guacamole" {
       guacamole_private_ip  = aws_network_interface.guacamole.private_ip
       kali_private_ip       = aws_network_interface.kali.private_ip
       kali_deployment_mode  = var.kali_deployment_mode
-      enable_external_vpn   = var.enable_external_vpn
-      external_vpn_cidrs    = var.external_vpn_cidrs
+      enable_vpn_tunnel   = var.enable_vpn_tunnel
+      vpn_tunnel_cidrs    = var.vpn_tunnel_cidrs
     }), "\r", ""))
   }), "\r", "")
 

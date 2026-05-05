@@ -23,7 +23,7 @@ SLIVER_URI_PREFIX="${sliver_uri_prefix}"
 HAVOC_URI_PREFIX="${havoc_uri_prefix}"
 C2_HEADER_NAME="${c2_header_name}"
 C2_HEADER_VALUE="${c2_header_value}"
-ENABLE_VPN="${enable_external_vpn}"
+ENABLE_VPN="${enable_vpn_tunnel}"
 ENABLE_REDIRECT_RULES="${enable_redirect_rules}"
 MAIN_VPC_CIDR="${main_vpc_cidr}"
 
@@ -397,10 +397,10 @@ VPNDOWN
 #!/bin/bash
 OVPN_FILE=$(find /home/admin/vpn -maxdepth 1 -name "*.ovpn" | sort | head -1)
 if [ -z "$OVPN_FILE" ]; then
-    echo "[ext-vpn] No .ovpn file found in ~/vpn/ — upload one and retry."
+    echo "[vpn-tunnel] No .ovpn file found in ~/vpn/ — upload one and retry."
     exit 1
 fi
-echo "[ext-vpn] Using config: $OVPN_FILE"
+echo "[vpn-tunnel] Using config: $OVPN_FILE"
 exec /usr/sbin/openvpn \
     --config "$OVPN_FILE" \
     --pull-filter ignore "redirect-gateway" \
@@ -412,9 +412,9 @@ VPNSTART
     chmod +x /usr/local/bin/vpn-start.sh
 
     # systemd service unit — not enabled, manual start only
-    cat > /etc/systemd/system/ext-vpn.service << 'VPNSERVICE'
+    cat > /etc/systemd/system/vpn-tunnel.service << 'VPNSERVICE'
 [Unit]
-Description=External VPN (HTB/VL/PG)
+Description=OpenVPN Tunnel (HTB/VL/PG)
 After=network-online.target
 Wants=network-online.target
 
@@ -431,7 +431,7 @@ VPNSERVICE
 
     systemctl daemon-reload
     # NOT enabled — operator starts manually after uploading .ovpn
-    echo "[+] VPN service installed (disabled — start manually with: sudo systemctl start ext-vpn)"
+    echo "[+] VPN service installed (disabled — start manually with: sudo systemctl start vpn-tunnel)"
 
     # --- WireGuard Server (wg0) ---
     # Package pre-installed here so it is ready when Guacamole SSHes in to push config.
@@ -472,12 +472,12 @@ fi
 
 if [ "$ENABLE_VPN" = "true" ]; then
     cat >> /etc/update-motd.d/99-redstack << 'MOTDEOF'
-printf '[EXT-VPN] HTB / VL / PG\n'
+printf '[vpnTUN] HTB / VL / PG\n'
 printf '  1. Upload:   scp lab.ovpn admin@<redirector-ip>:~/vpn/\n'
-printf '  2. Connect:  sudo systemctl start ext-vpn\n'
-printf '  3. Status:   sudo systemctl status ext-vpn\n'
-printf '  4. Logs:     sudo journalctl -u ext-vpn -f\n'
-printf '  5. Stop:     sudo systemctl stop ext-vpn\n'
+printf '  2. Connect:  sudo systemctl start vpn-tunnel\n'
+printf '  3. Status:   sudo systemctl status vpn-tunnel\n'
+printf '  4. Logs:     sudo journalctl -u vpn-tunnel -f\n'
+printf '  5. Stop:     sudo systemctl stop vpn-tunnel\n'
 printf '\n'
 MOTDEOF
 fi

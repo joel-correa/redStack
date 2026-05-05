@@ -84,7 +84,7 @@ resource "aws_route" "teamserver_to_redirector" {
 }
 
 # ============================================================================
-# EXTERNAL VPN ROUTING (Optional - for HTB/VL/PG access)
+# vpnTUN ROUTING (Optional - for HTB/VL/PG access)
 # ============================================================================
 
 # Route VPN target CIDRs from main VPC to Guacamole ENI (WireGuard gateway)
@@ -92,9 +92,9 @@ resource "aws_route" "teamserver_to_redirector" {
 # to tun0 (OpenVPN). Routes Guacamole's ENI directly (same VPC) — avoids the
 # VPC peering restriction that drops packets destined outside either VPC's CIDR.
 resource "aws_route" "teamserver_vpn_targets" {
-  count                  = var.enable_external_vpn ? length(var.external_vpn_cidrs) : 0
+  count                  = var.enable_vpn_tunnel ? length(var.vpn_tunnel_cidrs) : 0
   route_table_id         = var.use_default_vpc ? data.aws_vpc.default[0].main_route_table_id : aws_route_table.training[0].id
-  destination_cidr_block = var.external_vpn_cidrs[count.index]
+  destination_cidr_block = var.vpn_tunnel_cidrs[count.index]
   network_interface_id   = aws_network_interface.guacamole.id
 }
 
@@ -181,7 +181,7 @@ resource "aws_security_group_rule" "redirector_egress" {
 resource "aws_network_interface" "redirector" {
   subnet_id         = aws_subnet.redirector.id
   security_groups   = [aws_security_group.redirector.id]
-  source_dest_check = var.enable_external_vpn ? false : true
+  source_dest_check = var.enable_vpn_tunnel ? false : true
   tags              = { Name = "${var.project_name}-redirector-eni" }
 }
 
@@ -237,7 +237,7 @@ resource "aws_instance" "redirector" {
       havoc_uri_prefix      = var.havoc_uri_prefix
       c2_header_name        = var.c2_header_name
       c2_header_value       = local.c2_header_value
-      enable_external_vpn   = var.enable_external_vpn
+      enable_vpn_tunnel   = var.enable_vpn_tunnel
       enable_redirect_rules = var.enable_redirector_htaccess_filtering
       main_vpc_cidr         = var.use_default_vpc ? data.aws_vpc.default[0].cidr_block : var.vpc_cidr
     }), "\r", ""))

@@ -409,7 +409,7 @@ echo "===== Guacamole Server Setup Completed $(date) ====="
 echo "===== Access Guacamole at https://$PUBLIC_IP/guacamole ====="
 echo "===== Default credentials: guacadmin / $GUAC_ADMIN_PASSWORD ====="
 
-%{ if enable_external_vpn }
+%{ if enable_vpn_tunnel }
 # ============================================================================
 # WireGuard Tunnel Setup
 # Generates keypairs on-box and configures both ends of the tunnel via SSH.
@@ -442,7 +442,7 @@ PostDown = iptables -t nat -D POSTROUTING -o wg0 -j MASQUERADE; iptables -D FORW
 # Redirector (WireGuard server)
 PublicKey = $WG_SERVER_PUB
 Endpoint = ${redirector_private_ip}:51820
-AllowedIPs = ${join(",", external_vpn_cidrs)}
+AllowedIPs = ${join(",", vpn_tunnel_cidrs)}
 PersistentKeepalive = 25
 WGEOF
 
