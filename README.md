@@ -53,7 +53,7 @@ Seven EC2 instances across two peered VPCs. Two have public Elastic IPs (Guacamo
 | `kali` | Kali Linux workstation (AD enum + attack toolset) | No |
 
 Full inventory and sizing details: **[Lab-Inventory](https://github.com/BaddKharma/redStack/wiki/06.-Lab-Inventory)**.
-Architecture diagram: **[Lab-Architecture](https://github.com/BaddKharma/redStack/wiki/05.-Lab-Architecture)**.
+Architecture diagram: **[Lab-Architecture](https://github.com/BaddKharma/redStack/wiki/19.-Lab-Architecture)**.
 
 ---
 
@@ -76,7 +76,7 @@ Roughly **$0.25/hour** of compute while running. With `terraform destroy` betwee
 
 **Getting started:** [Home](https://github.com/BaddKharma/redStack/wiki) · [Quick-Start](https://github.com/BaddKharma/redStack/wiki/01.-Quick-Start) · [Prerequisites](https://github.com/BaddKharma/redStack/wiki/02.-Prerequisites) · [Deployment-Modes](https://github.com/BaddKharma/redStack/wiki/07.-Deployment-Modes) · [Deploy](https://github.com/BaddKharma/redStack/wiki/03.-Deploy) · [Verify](https://github.com/BaddKharma/redStack/wiki/04.-Verify)
 
-**Reference:** [Lab-Architecture](https://github.com/BaddKharma/redStack/wiki/05.-Lab-Architecture) · [Lab-Inventory](https://github.com/BaddKharma/redStack/wiki/06.-Lab-Inventory) · [SSH-Access](https://github.com/BaddKharma/redStack/wiki/08.-SSH-Access) · [Cost-Management](https://github.com/BaddKharma/redStack/wiki/17.-Cost-Management)
+**Reference:** [Lab-Architecture](https://github.com/BaddKharma/redStack/wiki/19.-Lab-Architecture) · [Lab-Inventory](https://github.com/BaddKharma/redStack/wiki/06.-Lab-Inventory) · [SSH-Access](https://github.com/BaddKharma/redStack/wiki/08.-SSH-Access) · [Cost-Management](https://github.com/BaddKharma/redStack/wiki/17.-Cost-Management)
 
 **C2 backends:** [Mythic](https://github.com/BaddKharma/redStack/wiki/10.-Mythic) · [Sliver](https://github.com/BaddKharma/redStack/wiki/11.-Sliver) · [Havoc](https://github.com/BaddKharma/redStack/wiki/12.-Havoc)
 
