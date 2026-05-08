@@ -248,22 +248,26 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
-echo "[*] Installing XFCE desktop and XRDP. This takes about 10 minutes."
+echo "[*] Installing XFCE desktop and XRDP. This takes about 4 minutes."
 apt-get update
 DEBIAN_FRONTEND=noninteractive apt-get install -y \
     kali-desktop-xfce \
     xrdp
 
 echo "[*] Configuring XRDP to launch XFCE..."
-# Tell xrdp's startup helper to start xfce4-session for the logged-in user.
-cat > /etc/skel/.xsession << 'XSESSION'
-xfce4-session
-XSESSION
-# Apply to admin's home if it exists
-if [ -d /home/admin ]; then
-    cp /etc/skel/.xsession /home/admin/.xsession
-    chown admin:admin /home/admin/.xsession
+# Rewrite startwm.sh to call startxfce4 directly — most reliable approach on Kali.
+# The default startwm.sh calls /etc/X11/Xsession which has inconsistent .xsession handling.
+cat > /etc/xrdp/startwm.sh << 'STARTWM'
+#!/bin/sh
+if test -r /etc/profile; then
+    . /etc/profile
 fi
+if test -r ~/.profile; then
+    . ~/.profile
+fi
+exec startxfce4
+STARTWM
+chmod +x /etc/xrdp/startwm.sh
 
 echo "[*] Enabling xrdp service..."
 systemctl enable xrdp
@@ -278,15 +282,11 @@ cat << 'DONE'
 
 [+] GUI conversion complete.
 
-Next step:
-  Open Guacamole. The "Kali Operator (XRDP)" connection will be present after
-  the next terraform apply. To register it now without re-applying, run on
-  the Guacamole host:
+Next step: register the XRDP connection in Guacamole by running this on the Guacamole host:
 
     sudo /opt/redstack/register-kali-rdp.sh
 
-  Or just re-apply terraform with kali_deployment_mode = "gui" to make the
-  change permanent across redeploys.
+Then open Guacamole and connect via "Kali Operator (XRDP)".
 
 DONE
 GUISCRIPT
@@ -320,9 +320,11 @@ done
 # Also clear the static /etc/motd file (sometimes contains Kali developer message)
 truncate -s 0 /etc/motd 2>/dev/null || true
 
-# Disable /usr/bin/kali-motd called from /etc/profile.d/kali.sh (Kali developer message)
+# Disable /usr/bin/kali-motd called from /etc/profile.d/kali.sh (Kali developer message).
+# Remove the entire if block — an empty if/fi with only a comment is a syntax error in sh.
 if [ -f /etc/profile.d/kali.sh ]; then
-    sed -i 's|    kali-motd|    # kali-motd  # disabled by redStack|' /etc/profile.d/kali.sh
+    sed -i '/^# Display message.*cloud systems/,/^fi$/d' /etc/profile.d/kali.sh
+    echo '# kali-motd disabled by redStack' >> /etc/profile.d/kali.sh
 fi
 
 # ----------------------------------------------------------------------------
@@ -333,13 +335,17 @@ if [ "$KALI_MODE" = "gui" ]; then
         kali-desktop-xfce \
         xrdp
 
-    cat > /etc/skel/.xsession << 'XSESSION'
-xfce4-session
-XSESSION
-    if [ -d /home/admin ]; then
-        cp /etc/skel/.xsession /home/admin/.xsession
-        chown admin:admin /home/admin/.xsession
-    fi
+    cat > /etc/xrdp/startwm.sh << 'STARTWM'
+#!/bin/sh
+if test -r /etc/profile; then
+    . /etc/profile
+fi
+if test -r ~/.profile; then
+    . ~/.profile
+fi
+exec startxfce4
+STARTWM
+    chmod +x /etc/xrdp/startwm.sh
 
     systemctl enable xrdp
     systemctl restart xrdp

@@ -405,6 +405,54 @@ else
     echo "[!] Warning: Could not automatically configure Guacamole. Manual setup required."
 fi
 
+# Create the register-kali-rdp.sh helper script for post-deploy headless->GUI conversion.
+# kali-go-gui prints the instruction to run this; it registers the Kali XRDP connection
+# in Guacamole without requiring a terraform re-apply.
+mkdir -p /opt/redstack
+cat > /opt/redstack/register-kali-rdp.sh << RDPSCRIPT
+#!/bin/bash
+set -e
+KALI_IP="$KALI_PRIVATE_IP"
+LAB_PASS="$SSH_PASSWORD"
+
+echo "[*] Obtaining Guacamole API token..."
+RESPONSE=\$(curl -s -X POST "http://localhost:8080/guacamole/api/tokens" \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -d "username=guacadmin&password=\$LAB_PASS")
+TOKEN=\$(printf '%s' "\$RESPONSE" | jq -r '.authToken // empty' 2>/dev/null)
+
+if [ -z "\$TOKEN" ]; then
+    echo "[!] Failed to get API token. Check that Guacamole is running and the lab password is correct."
+    exit 1
+fi
+
+echo "[*] Registering Kali XRDP connection..."
+curl -s -X POST "http://localhost:8080/guacamole/api/session/data/postgresql/connections?token=\$TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "{
+        \"name\": \"Kali (XRDP)\",
+        \"protocol\": \"rdp\",
+        \"parameters\": {
+            \"hostname\": \"\$KALI_IP\",
+            \"port\": \"3389\",
+            \"username\": \"admin\",
+            \"password\": \"\$LAB_PASS\",
+            \"security\": \"any\",
+            \"ignore-cert\": \"true\",
+            \"color-depth\": \"24\",
+            \"resize-method\": \"display-update\"
+        },
+        \"attributes\": {
+            \"max-connections\": \"2\",
+            \"max-connections-per-user\": \"1\"
+        }
+    }"
+
+echo ""
+echo "[+] Done. Refresh the Guacamole home page — 'Kali (XRDP)' will appear in the connection list."
+RDPSCRIPT
+chmod 755 /opt/redstack/register-kali-rdp.sh
+
 echo "===== Guacamole Server Setup Completed $(date) ====="
 echo "===== Access Guacamole at https://$PUBLIC_IP/guacamole ====="
 echo "===== Default credentials: guacadmin / $GUAC_ADMIN_PASSWORD ====="
