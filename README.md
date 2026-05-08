@@ -32,7 +32,7 @@ The wiki is the de facto operator handbook. This README is a thin landing page s
 | 4 | Confirm Guacamole + Windows + internal DNS | **[Verify](https://github.com/BaddKharma/redStack/wiki/05.-Verify)** |
 | 5 | Land first beacon: pick a C2 | **[Mythic](https://github.com/BaddKharma/redStack/wiki/10.-Mythic)** · **[Sliver](https://github.com/BaddKharma/redStack/wiki/11.-Sliver)** · **[Havoc](https://github.com/BaddKharma/redStack/wiki/12.-Havoc)** |
 
-**Total time:** ~45-90 minutes on first deploy. Subsequent deploys: ~30-45 minutes.
+**Total time:** ~30-60 minutes on first deploy. Subsequent deploys: ~20-30 minutes.
 
 **Returning operator?** [Quick-Start](https://github.com/BaddKharma/redStack/wiki/01.-Quick-Start) is the abbreviated path.
 
