@@ -93,7 +93,7 @@ Roughly **$0.27/hour** of compute while running. With `terraform destroy` betwee
 ```
 redStack/
 ├── README.md                 This file (the landing page)
-├── LICENSE                   MIT (also inlined below)
+├── LICENSE                   MIT + Commons Clause (also inlined below)
 ├── assets/                   Static images (banner)
 ├── rs-rsa-key.pem            Your AWS SSH key (gitignored, place here)
 └── terraform/                All Terraform code
@@ -126,26 +126,8 @@ The SSH private key (`rs-rsa-key.pem`) lives at the repo root; `terraform.tfvars
 
 ## License
 
-```
-MIT License
+MIT License with Commons Clause. Free to use, deploy, modify, and share for any purpose.
+Commercial use — selling redStack or building a paid product or service on it — requires
+written permission.
 
-Copyright (c) 2026 BaddKharma
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+For commercial licensing: [mike@devzerosecurity.com](mailto:mike@devzerosecurity.com). See [LICENSE](LICENSE) for full terms.
