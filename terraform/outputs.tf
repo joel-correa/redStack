@@ -164,7 +164,7 @@ network_architecture_content = <<-EOT
 
 ${var.enable_vpn_tunnel ? <<-VPNARCH
 
-  vpnTUN Routing (HTB / VL / PG via OpenVPN + WireGuard):
+  vpnTUN Routing (Cyber Ranges via OpenVPN + WireGuard):
   +-------------------------+-------------------------------------------+
   |  WG Server (redirector) |  wg0: 10.100.0.1
   |  WG Client (guacamole)  |  wg0: 10.100.0.2

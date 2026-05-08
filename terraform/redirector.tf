@@ -84,7 +84,7 @@ resource "aws_route" "teamserver_to_redirector" {
 }
 
 # ============================================================================
-# vpnTUN ROUTING (Optional - for HTB/VL/PG access)
+# vpnTUN ROUTING (Optional - for cyber range access)
 # ============================================================================
 
 # Route VPN target CIDRs from main VPC to Guacamole ENI (WireGuard gateway)

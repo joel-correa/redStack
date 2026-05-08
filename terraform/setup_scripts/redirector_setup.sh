@@ -417,7 +417,7 @@ VPNSTART
     # systemd service unit — not enabled, manual start only
     cat > /etc/systemd/system/vpn-tunnel.service << 'VPNSERVICE'
 [Unit]
-Description=OpenVPN Tunnel (HTB/VL/PG)
+Description=OpenVPN Tunnel (Cyber Range)
 After=network-online.target
 Wants=network-online.target
 
@@ -475,7 +475,7 @@ fi
 
 if [ "$ENABLE_VPN" = "true" ]; then
     cat >> /etc/update-motd.d/99-redstack << 'MOTDEOF'
-printf '[vpnTUN] HTB / VL / PG\n'
+printf '[vpnTUN] Cyber Range\n'
 TUN0_IP=$(ip -4 addr show tun0 2>/dev/null | grep -oP '(?<=inet\s)\d+(\.\d+)+')
 if [ -n "$TUN0_IP" ]; then
     printf "  tun0 IP:     %s  (use for C2 callbacks on isolated targets)\n" "$TUN0_IP"
