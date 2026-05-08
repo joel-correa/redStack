@@ -271,7 +271,7 @@ systemctl restart xrdp
 
 # Update the MOTD banner so future logins reflect GUI mode
 if [ -f /etc/update-motd.d/99-kali-mode ]; then
-    sed -i 's/Mode: HEADLESS/Mode: GUI (converted post-deploy)/' /etc/update-motd.d/99-kali-mode
+    sed -i 's/Current Mode:   HEADLESS/Current Mode:   GUI (converted post-deploy)/' /etc/update-motd.d/99-kali-mode
 fi
 
 cat << 'DONE'
@@ -302,26 +302,23 @@ cat << BANNER
 +=====================================================================+
 |  redStack KALI WORKSTATION                                          |
 +=====================================================================+
-   Mode:           $(echo "${kali_deployment_mode}" | tr '[:lower:]' '[:upper:]')
+   Current Mode:   $(echo "${kali_deployment_mode}" | tr '[:lower:]' '[:upper:]')
    Tools:          21-tool AD/enum suite (installed at setup)
    Refresh/fix:    sudo install-kali-tools
    Convert to GUI: sudo kali-go-gui            (only needed in HEADLESS mode)
-   Lab hosts:      kali, guac, mythic, sliver, havoc, redirector, windows
 +=====================================================================+
 
 BANNER
 MOTD
 chmod 755 /etc/update-motd.d/99-kali-mode
 
-# Disable the default Kali login motd if present (keeps banner clean)
-if [ -f /etc/update-motd.d/00-kali ]; then
-    chmod -x /etc/update-motd.d/00-kali
-fi
-
-# Disable the Kali developer "minimal install" motd script if present
-if [ -f /etc/update-motd.d/99-kali-motd ]; then
-    chmod -x /etc/update-motd.d/99-kali-motd
-fi
+# Disable all default Kali motd scripts — keep only ours
+for f in /etc/update-motd.d/*; do
+    [ "$(basename "$f")" = "99-kali-mode" ] && continue
+    chmod -x "$f" 2>/dev/null || true
+done
+# Also clear the static /etc/motd file (sometimes contains Kali developer message)
+truncate -s 0 /etc/motd 2>/dev/null || true
 
 # ----------------------------------------------------------------------------
 # 9. GUI install if mode == gui
